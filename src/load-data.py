@@ -1,11 +1,14 @@
 import pandas as pd
+import os
 from sklearn.datasets import load_diabetes
 
-def load_diabetes_data():
+def load_and_save_data():
     data = load_diabetes()
-    X = data.data
-    y = data.target
-    feature_names = data.feature_names
-    df = pd.DataFrame(X, columns=feature_names)
-    df['target'] = y
-    return df, X, y, feature_names
+    df = pd.DataFrame(data.data, columns=data.feature_names)
+    df['target'] = data.target
+
+    # Save raw data
+    os.makedirs("data/raw", exist_ok=True)
+    df.to_csv("data/raw/diabetes_raw.csv", index=False)
+
+    return df
