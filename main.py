@@ -1,26 +1,28 @@
-from src.load_data import load_diabetes_data
-from src.visualize import plot_feature_vs_target, plot_actual_vs_predicted, plot_with_corruption
-from src.models import get_models, evaluate_models, corrupt_target
+from src.load_data import load_and_save_data
+from src.visualize import scatter_bmi_vs_target
+from src.models import evaluate_models
 
-from sklearn.model_selection import cross_val_predict
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
+from sklearn.model_selection import KFold
 
-def main():
-    df, X, y, feature_names = load_diabetes_data()
-    print("Data shape:", df.shape)
+# Load and save data
+df = load_and_save_data()
+X = df.drop(columns="target").values
+y = df["target"].values
 
-    feature_index = 2
-    plot_feature_vs_target(X[:, feature_index], y, xlabel=feature_names[feature_index])
+# Visualize and save scatter plot
+scatter_bmi_vs_target(X, y)
 
-    models = get_models()
-    predictions, labels = evaluate_models(models, X, y)
-    plot_actual_vs_predicted(y, predictions, labels)
+# Define models
+models = {
+    "OLS": LinearRegression(),
+    "Ridge": Ridge(alpha=1.0),
+    "LASSO": Lasso(alpha=0.1),
+    "ElasticNet": ElasticNet(alpha=0.1, l1_ratio=0.5)
+}
 
-    corrupted_index = 100
-    y_corrupted = corrupt_target(y, corrupted_index, 200)
-    model = LinearRegression()
-    y_pred_corrupted = cross_val_predict(model, X, y_corrupted, cv=5)
-    plot_with_corruption(y_corrupted, y_pred_corrupted, corrupted_index)
+# Cross-validation setup
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
 
-if __name__ == "__main__":
-    main()
+# Evaluate and save results
+evaluate_models(models, X, y, kf)
