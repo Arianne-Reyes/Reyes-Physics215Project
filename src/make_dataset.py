@@ -1,9 +1,11 @@
 import pandas as pd
 from sklearn.datasets import load_diabetes
+import os
 
 data = load_diabetes()
 df = pd.DataFrame(data.data, columns=data.feature_names)
 df['target'] = data.target
 
-# Assuming 'data/raw' folder already exists, so no need to create it here
+# Ensure the folder exists before saving
+os.makedirs("data/raw", exist_ok=True)
 df.to_csv("data/raw/diabetes_raw.csv", index=False)
